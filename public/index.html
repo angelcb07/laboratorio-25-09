@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TecnoCell - Venta de Celulares</title>
+    <!-- Vinculamos el archivo CSS externo -->
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="/auth/auth.css">
+</head>
+
+<script src="/auth/auth.js"></script>
+
+<body>
+<nav data-auth-actions></nav>
+    <header>
+        <h1>📱 TecnoCell</h1>
+
+        
+
+        <button class="cart-btn" onclick="toggleCart()">Carrito (<span id="cart-count">0</span>)</button>
+    </header>
+
+    <section class="hero">
+        <h2>Los mejores smartphones al mejor precio</h2>
+        <p>Encuentra la última tecnología en la palma de tu mano</p>
+    </section>
+
+    <div class="container">
+        <h2 class="section-title">Nuestros Modelos</h2>
+        <div class="products-grid" id="product-list">
+            <!-- Los productos se cargarán dinámicamente con JavaScript -->
+        </div>
+    </div>
+
+    <!-- Modal del Carrito -->
+    <div class="cart-modal" id="cartModal">
+        <div class="cart-content">
+            <h3>Tu Carrito de Compras</h3>
+            <ul class="cart-items" id="cartItems">
+                <!-- Ítems del carrito -->
+            </ul>
+            <p><strong>Total: $<span id="cartTotal">0</span></strong></p>
+            <button class="buy-btn" onclick="checkout()" style="margin-top: 1rem;">Finalizar Compra</button>
+            <br>
+            <button class="close-cart" onclick="toggleCart()">Cerrar</button>
+        </div>
+    </div>
+
+    <footer>
+        <p>&copy; 2026 TecnoCell. Todos los derechos reservados.</p>
+    </footer>
+
+    <!-- Vinculamos el archivo JS externo -->
+    <script src="script.js"></script>
+</body>
+</html>
