@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>MongoDB + Render</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 700px;
+            margin: 40px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+
+        .contenedor {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+        }
+
+        input {
+            display: block;
+            width: 100%;
+            box-sizing: border-box;
+            padding: 10px;
+            margin: 10px 0;
+        }
+
+        button {
+            padding: 10px 15px;
+            cursor: pointer;
+        }
+
+        .usuario {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #ddd;
+            padding: 10px 0;
+        }
+
+        .eliminar {
+            background: #d33;
+            color: white;
+            border: none;
+        }
+
+        .nav-derecha{
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            z-index: 1000;
+        }
+
+        #mensaje {
+            margin: 15px 0;
+        }
+
+    </style>
+
+    <link rel="stylesheet" href="/auth/auth.css">    
+
+</head>
+
+<script src="/auth/auth.js"></script>
+
+<body>
+
+<nav data-auth-actions class="nav-derecha"></nav>
+
+<div class="contenedor">
+
+    <h1>MongoDB + Render</h1>    
+
+    <p>
+        Aplicación de prueba usando Node.js,
+        Express y MongoDB.
+    </p>
+
+    <h2>Registrar usuario</h2>
+
+    <form id="formUsuario">
+
+        <input
+            id="nombres"
+            type="text"
+            placeholder="Nombres"
+            required
+        >
+
+        <input
+            id="apellidos"
+            type="text"
+            placeholder="Apellidos"
+            required
+        >
+
+        <input
+            id="correo"
+            type="email"
+            placeholder="Correo electrónico"
+            required
+        >
+
+        <input
+            id="password"
+            type="password"
+            placeholder="Contraseña (mínimo 8 caracteres)"
+            minlength="8"
+            required
+        >
+
+        <button type="submit">
+            Guardar en MongoDB
+        </button>
+
+    </form>
+
+    <div id="mensaje"></div>
+
+    <h2>Usuarios registrados</h2>
+
+    <div id="usuarios">
+        Cargando...
+    </div>
+
+</div>
+
+<script>
+
+const form = document.getElementById("formUsuario");
+const lista = document.getElementById("usuarios");
+const mensaje = document.getElementById("mensaje");
+
+async function cargarUsuarios() {
+
+    try {
+
+        const respuesta = await fetch("/api/usuarios");
+        const usuarios = await respuesta.json();
+
+        lista.innerHTML = "";
+
+        if (usuarios.length === 0) {
+            lista.innerHTML = "<p>No hay usuarios registrados.</p>";
+            return;
+        }
+
+        usuarios.forEach(usuario => {
+
+            const div = document.createElement("div");
+            div.className = "usuario";
+
+            const datos = document.createElement("span");
+            datos.textContent =
+                `${usuario.nombres} ${usuario.apellidos} - ${usuario.correo}`;
+
+            const boton = document.createElement("button");
+            boton.textContent = "Eliminar";
+            boton.className = "eliminar";
+
+            boton.addEventListener("click", () => {
+                eliminarUsuario(usuario._id);
+            });
+
+            div.appendChild(datos);
+            div.appendChild(boton);
+
+            lista.appendChild(div);
+        });
+
+    } catch (error) {
+
+        lista.textContent =
+            "Error cargando los usuarios.";
+
+    }
+}
+
+
+form.addEventListener("submit", async (event) => {
+
+    event.preventDefault();
+
+    const nombres = document.getElementById("nombres").value;
+    const apellidos = document.getElementById("apellidos").value;
+    const correo = document.getElementById("correo").value;
+    const password = document.getElementById("password").value;
+
+    try {
+
+        // CAMBIO MÍNIMO: reutilizamos el registro que ya existe
+        // y que guarda correctamente passwordHash en Usuario.js.
+        const respuesta = await fetch("/api/auth/registro", {
+
+            method: "POST",
+
+            headers: {
+                "Content-Type": "application/json"
+            },
+
+            body: JSON.stringify({
+                nombres,
+                apellidos,
+                correo,
+                password
+            })
+
+        });
+
+        const resultado = await respuesta.json();
+
+        if (!respuesta.ok) {
+            throw new Error(
+                resultado.mensaje || "Error registrando usuario"
+            );
+        }
+
+        mensaje.textContent =
+            "Usuario registrado correctamente.";
+
+        form.reset();
+        cargarUsuarios();
+
+    } catch (error) {
+        mensaje.textContent = error.message;
+    }
+
+});
+
+
+async function eliminarUsuario(id) {
+
+    try {
+
+        const respuesta =
+            await fetch(`/api/usuarios/${id}`, {
+                method: "DELETE"
+            });
+
+        if (!respuesta.ok) {
+            throw new Error("No se pudo eliminar");
+        }
+
+        cargarUsuarios();
+
+    } catch (error) {
+
+        mensaje.textContent =
+            "Error eliminando usuario.";
+
+    }
+
+}
+
+
+cargarUsuarios();
+
+</script>
+
+<p style="text-align:center"><a href="/atencion/">Formulario de atención al cliente (sin login)</a></p>
+</body>
+</html>
